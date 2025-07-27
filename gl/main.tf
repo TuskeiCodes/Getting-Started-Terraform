@@ -3,9 +3,9 @@
 ##################################################################################
 
 provider "aws" {
-  access_key = "ACCESS_KEY"
-  secret_key = "SECRET_KEY"
-  region     = "us-east-1"
+  access_key = var.aws_access_key
+  secret_key = var.aws_secret_key
+  region     = var.aws_region
 }
 
 ##################################################################################
@@ -22,8 +22,8 @@ data "aws_ssm_parameter" "amzn2_linux" {
 
 # NETWORKING #
 resource "aws_vpc" "app" {
-  cidr_block           = "10.0.0.0/16"
-  enable_dns_hostnames = true
+  cidr_block           = var.aws_vpc_cidr_block
+  enable_dns_hostnames = var.awa_vpc_dns_hostnames
 
 }
 
@@ -33,9 +33,9 @@ resource "aws_internet_gateway" "app" {
 }
 
 resource "aws_subnet" "public_subnet1" {
-  cidr_block              = "10.0.0.0/24"
+  cidr_block              = var.awa_subnet_public_subnet1_cidr_block
   vpc_id                  = aws_vpc.app.id
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = var.awaw_subnet_map_public_ip_on_launch
 }
 
 # ROUTING #
@@ -43,7 +43,7 @@ resource "aws_route_table" "app" {
   vpc_id = aws_vpc.app.id
 
   route {
-    cidr_block = "0.0.0.0/0"
+    cidr_block = var.aws_route_tabele_cidr_block
     gateway_id = aws_internet_gateway.app.id
   }
 }
@@ -56,30 +56,30 @@ resource "aws_route_table_association" "app_subnet1" {
 # SECURITY GROUPS #
 # Nginx security group 
 resource "aws_security_group" "nginx_sg" {
-  name   = "nginx_sg"
+  name   = var.aws_secrity_group_name
   vpc_id = aws_vpc.app.id
 
   # HTTP access from anywhere
   ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = var.ingress_from_port
+    to_port     = var.ingress_to_port
+    protocol    = var.ingress_protocol
+    cidr_blocks = [var.ingress_cidr_blocks]
   }
 
   # outbound internet access
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = var.egress_from_port
+    to_port     = var.egress_to_port
+    protocol    = var.egress_protocol
+    cidr_blocks = [varr.egress_cidr_blocks]
   }
 }
 
 # INSTANCES #
 resource "aws_instance" "nginx1" {
   ami                    = nonsensitive(data.aws_ssm_parameter.amzn2_linux.value)
-  instance_type          = "t3.micro"
+  instance_type          = var.instance_type
   subnet_id              = aws_subnet.public_subnet1.id
   vpc_security_group_ids = [aws_security_group.nginx_sg.id]
 

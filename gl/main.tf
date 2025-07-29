@@ -25,10 +25,13 @@ resource "aws_vpc" "app" {
   cidr_block           = var.aws_vpc_cidr_block
   enable_dns_hostnames = var.awa_vpc_dns_hostnames
 
+  tags = local.common_tags
 }
 
 resource "aws_internet_gateway" "app" {
   vpc_id = aws_vpc.app.id
+
+  tags = local.common_tags
 
 }
 
@@ -36,6 +39,8 @@ resource "aws_subnet" "public_subnet1" {
   cidr_block              = var.awa_subnet_public_subnet1_cidr_block
   vpc_id                  = aws_vpc.app.id
   map_public_ip_on_launch = var.awaw_subnet_map_public_ip_on_launch
+
+  tags = local.common_tags
 }
 
 # ROUTING #
@@ -46,6 +51,8 @@ resource "aws_route_table" "app" {
     cidr_block = var.aws_route_tabele_cidr_block
     gateway_id = aws_internet_gateway.app.id
   }
+
+  tags = local.common_tags
 }
 
 resource "aws_route_table_association" "app_subnet1" {
@@ -65,6 +72,7 @@ resource "aws_security_group" "nginx_sg" {
     to_port     = var.ingress_to_port
     protocol    = var.ingress_protocol
     cidr_blocks = [var.ingress_cidr_blocks]
+
   }
 
   # outbound internet access
@@ -74,6 +82,9 @@ resource "aws_security_group" "nginx_sg" {
     protocol    = var.egress_protocol
     cidr_blocks = [varr.egress_cidr_blocks]
   }
+
+  tags = local.common_tags
+
 }
 
 # INSTANCES #
@@ -84,6 +95,7 @@ resource "aws_instance" "nginx1" {
   vpc_security_group_ids = [aws_security_group.nginx_sg.id]
 
   user_data = <<EOF
+  tags = local.common_tags
 #! /bin/bash
 sudo amazon-linux-extras install -y nginx1
 sudo service nginx start

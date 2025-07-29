@@ -131,3 +131,18 @@ variable "instance_type" {
   default     = "t3.micro"
 }
 
+variable "company_tag" {
+    type        = string
+    description = "Company tag for resources"
+    default     = "Globomantics"
+}
+
+variable "project_tag" {
+    type        = string
+    description = "Project tag for resources"
+}
+
+variable "billing_tag" {
+  type = string
+  description = "Billing tag for resources"
+}
